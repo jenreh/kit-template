@@ -145,7 +145,6 @@ _exclude:
   - "{% if project_type != 'reflex' %}/assets{% endif %}"
   - "{% if project_type != 'reflex' %}/components{% endif %}"
   - "{% if project_type != 'reflex' %}/.env.default{% endif %}"
-  - "{% if project_type != 'reflex' %}/taskfiles/Taskfile.reflex.yml{% endif %}"
   # github workflows: docker-publish ↔ include_docker; pypi-publish ↔ python libs
   - "{% if not include_docker %}/.github/workflows/01_build_and_publish_docker_image.yml{% endif %}"
   - "{% if project_type != 'python' %}/.github/workflows/02_publish_to_pypi.yml{% endif %}"
@@ -156,18 +155,17 @@ _exclude:
   # appkit migration is reflex-only.
   - "{% if not (project_type == 'reflex' or include_db) %}/alembic{% endif %}"
   - "{% if not (project_type == 'reflex' or include_db) %}/alembic.ini{% endif %}"
-  - "{% if not (project_type == 'reflex' or include_db) %}/taskfiles/Taskfile.db.yml{% endif %}"
   - "{% if project_type != 'reflex' %}/alembic/versions/2025_12_30_appkit_user_0.10.0.py{% endif %}"
   # docker (root files only; .devcontainer/ Dockerfile + compose are separate)
-  - "{% if not include_docker %}/taskfiles/Taskfile.docker.yml{% endif %}"
   - "{% if not (project_type == 'reflex' and include_docker) %}/Dockerfile{% endif %}"
   - "{% if not (project_type == 'reflex' and include_docker) %}/docker-compose.yml{% endif %}"
   # .dockerignore ships for any include_docker (its contents branch on project_type).
   - "{% if not include_docker %}/.dockerignore{% endif %}"
   # devcontainer (available for any project type)
   - "{% if not use_devcontainer %}/.devcontainer{% endif %}"
-  # terraform — the taskfiles/ provider Taskfile self-gates via its conditional
-  # filename, so only the unused deploy-*.sh needs an explicit exclude here.
+  # terraform — taskfiles/Taskfile.terraform.yaml always ships (rendered for the
+  # chosen cloud_provider) and is switched on via the includes block in
+  # Taskfile.dist.yml; only the terraform/ scaffold + unused deploy-*.sh are gated.
   - "{% if not include_terraform %}/terraform{% endif %}"
   - "{% if not (include_terraform and cloud_provider == 'azure') %}/terraform/deploy-azure.sh{% endif %}"
   - "{% if not (include_terraform and cloud_provider == 'aws') %}/terraform/deploy-aws.sh{% endif %}"

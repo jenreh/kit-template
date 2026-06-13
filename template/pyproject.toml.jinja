@@ -109,8 +109,8 @@ replace = 'version = "{new_version}"'
 {% if project_type == 'python' -%}
 [[tool.bumpversion.files]]
 filename = "README.md"
-search = '![Version](https://img.shields.io/badge/version-{current_version}-blue)'
-replace = '![Version](https://img.shields.io/badge/version-{new_version}-blue)'
+search = '  ![Version](https://img.shields.io/badge/version-{current_version}-blue)'
+replace = '  ![Version](https://img.shields.io/badge/version-{new_version}-blue)'
 {% endif -%}
 {% if project_type == 'reflex' -%}
 [[tool.bumpversion.files]]

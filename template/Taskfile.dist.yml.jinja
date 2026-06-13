@@ -2,43 +2,76 @@
 
 version: "3"
 
+# Every taskfile under ./taskfiles/ is shipped with the project. This block is
+# the switchboard: an include is active when uncommented and inert when
+# commented. Enable a feature later by uncommenting its block (and providing the
+# files it needs, e.g. terraform/, alembic/). Copier pre-selected the set below
+# from the answers you gave when the project was generated.
 includes:
-  # Optional includes are marked `optional: true`, so go-task silently skips any
-  # taskfiles/Taskfile.*.yml the Copier template chose not to ship (per feature flags).
   qa:
     taskfile: ./taskfiles/Taskfile.qa.yml
     flatten: true
     vars:
-      PROJECT: "{{.PROJECT}}"
+      PROJECT: "{% raw %}{{.PROJECT}}{% endraw %}"
   release: ./taskfiles/Taskfile.release.yml
+{% if project_type == 'reflex' %}
   reflex:
     taskfile: ./taskfiles/Taskfile.reflex.yml
     flatten: true
-    optional: true
+{%- else %}
+  # reflex:
+  #   taskfile: ./taskfiles/Taskfile.reflex.yml
+  #   flatten: true
+{%- endif %}
+{% if project_type == 'reflex' or include_db %}
   db:
     taskfile: ./taskfiles/Taskfile.db.yml
-    optional: true
+{%- else %}
+  # db:
+  #   taskfile: ./taskfiles/Taskfile.db.yml
+{%- endif %}
+{% if include_docker %}
   docker:
     taskfile: ./taskfiles/Taskfile.docker.yml
-    optional: true
     vars:
-      IMAGE_NAME: "{{.PROJECT}}-image"
+      IMAGE_NAME: "{% raw %}{{.PROJECT}}{% endraw %}-image"
+{%- else %}
+  # docker:
+  #   taskfile: ./taskfiles/Taskfile.docker.yml
+  #   vars:
+  #     IMAGE_NAME: "{% raw %}{{.PROJECT}}{% endraw %}-image"
+{%- endif %}
+{% if include_terraform %}
   dev:
     taskfile: ./taskfiles/Taskfile.terraform.yaml
-    optional: true
     vars:
-      TF_DIR: "{{.ROOT_DIR}}/terraform"
+      TF_DIR: "{% raw %}{{.ROOT_DIR}}{% endraw %}/terraform"
       ENVIRONMENT: dev
   prod:
     taskfile: ./taskfiles/Taskfile.terraform.yaml
-    optional: true
     vars:
-      TF_DIR: "{{.ROOT_DIR}}/terraform"
+      TF_DIR: "{% raw %}{{.ROOT_DIR}}{% endraw %}/terraform"
       ENVIRONMENT: prod
+{%- else %}
+  # dev:
+  #   taskfile: ./taskfiles/Taskfile.terraform.yaml
+  #   vars:
+  #     TF_DIR: "{% raw %}{{.ROOT_DIR}}{% endraw %}/terraform"
+  #     ENVIRONMENT: dev
+  # prod:
+  #   taskfile: ./taskfiles/Taskfile.terraform.yaml
+  #   vars:
+  #     TF_DIR: "{% raw %}{{.ROOT_DIR}}{% endraw %}/terraform"
+  #     ENVIRONMENT: prod
+{%- endif %}
+{% if include_docs %}
   docs:
     taskfile: ./taskfiles/Taskfile.docs.yml
-    optional: true
-
+{%- else %}
+  # docs:
+  #   taskfile: ./taskfiles/Taskfile.docs.yml
+{%- endif %}
+{% raw %}
 silent: true
 
 vars:
@@ -88,3 +121,4 @@ tasks:
       - rm -rf __pycache__/ .cache/ .state/ .web/ dist/ build/ coverage.xml .coverage
       - find . -type d -name "__pycache__" -exec rm -rf {} +
       - find . -type f -name "*.pyc" -delete
+{% endraw %}
