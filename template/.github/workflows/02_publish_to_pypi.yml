@@ -27,13 +27,7 @@ jobs:
           version: "latest"
 
       - name: UV Build
-        run: |
-          uv build --package appkit-assistant
-          uv build --package appkit-commons
-          uv build --package appkit-imagecreator
-          uv build --package appkit-mantine
-          uv build --package appkit-ui
-          uv build --package appkit-user
+        run: uv build
 
       - name: Publish to PyPI
         run: uv publish

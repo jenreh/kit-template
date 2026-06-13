@@ -12,27 +12,30 @@ services:
     command: sleep infinity
     networks:
       - {{ project_name }}-network
-{% if project_type == 'reflex' or include_db %}
+{%- if project_type == 'reflex' or include_db %}
+
   db:
-    container_name: {{ project_name }}-db
+    container_name: {{ project_name }}-dev-db
     image: pgvector/pgvector:pg15
     restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - dev-postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: {{ db_name }}
       POSTGRES_PASSWORD: postgres
     ports:
-      - 5433:5432
+      - 5434:5432
     networks:
       - {{ project_name }}-network
-{% endif %}
-{% if project_type == 'reflex' or include_db %}
-volumes:
-  postgres-data:
-    name: {{ project_name }}-postgres-data
-{% endif %}
+{%- endif %}
+
 networks:
   {{ project_name }}-network:
     driver: bridge
+{%- if project_type == 'reflex' or include_db %}
+
+volumes:
+  dev-postgres-data:
+    name: {{ project_name }}-dev-postgres-data
+{%- endif %}

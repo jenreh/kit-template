@@ -41,7 +41,7 @@
     "reportIncompatibleVariableOverride": false
   },
   "python.analysis.include": [
-    "app/**"
+    "{% if project_type == 'reflex' %}app{% else %}{{ package_name }}{% endif %}/**"
   ],
   "python.analysis.indexing": true,
   "python.analysis.inlayHints.pytestParameters": false,
@@ -50,7 +50,7 @@
   "python.analysis.inlayHints.functionReturnTypes": false,
   "python.analysis.inlayHints.variableTypes": false,
   "python.autoComplete.extraPaths": [
-    "app/**"
+    "{% if project_type == 'reflex' %}app{% else %}{{ package_name }}{% endif %}/**"
   ],
   "python.createEnvironment.contentButton": "show",
   "python.envFile": "${workspaceFolder}/.env",

@@ -32,9 +32,15 @@
 				"github.vscode-github-actions",
 				"GitHub.vscode-pull-request-github",
 				"humao.rest-client",
+{%- if include_terraform %}
 				"ms-azuretools.vscode-azureterraform",
+{%- endif %}
+{%- if include_docker %}
 				"ms-azuretools.vscode-docker",
+{%- endif %}
+{%- if project_type == 'reflex' or include_db %}
 				"ms-ossdata.vscode-pgsql",
+{%- endif %}
 				"ms-python.mypy-type-checker",
 				"ms-python.python",
 				"mutantdino.resourcemonitor",
@@ -56,18 +62,23 @@
 			"username": "vscode"
 		},
 		"ghcr.io/devcontainers/features/git:1.3.5": {},
-		// "ghcr.io/devcontainers/features/git-lfs:1.2.5": {},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1.10.0": {},
 		"ghcr.io/devcontainers/features/github-cli:1.1.0": {},
-		// "ghcr.io/devcontainers/features/azure-cli:1.2.8": {},
-		// "ghcr.io/devcontainers/features/terraform:1.4.2": {
-		//    "installTerraformDocs": "true",
-		//	  "installTFsec": "true"
-		// },
-		"ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
+		"ghcr.io/jsburckhardt/devcontainer-features/uv:1": {}{% if include_docker or include_terraform or project_type == "reflex" %},{% endif %}
+{%- if include_docker %}
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1.10.0": {}{% if include_terraform or project_type == "reflex" %},{% endif %}
+{%- endif %}
+{%- if include_terraform %}
+		"ghcr.io/devcontainers/features/azure-cli:1.2.8": {},
+		"ghcr.io/devcontainers/features/terraform:1.4.2": {
+			"installTerraformDocs": "true",
+			"installTFsec": "true"
+		}{% if project_type == "reflex" %},{% endif %}
+{%- endif %}
+{%- if project_type == "reflex" %}
 		"ghcr.io/devcontainers/features/node:2.0.0": {
 			"version": "24"
 		}
+{%- endif %}
 	},
 	"postCreateCommand": {
 		"initialize environment": "bash ./.devcontainer/post-create.sh"

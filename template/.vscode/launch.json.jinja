@@ -1,6 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+{%- if project_type == 'reflex' %}
         {
             "name": "Reflex Debug",
             "type": "debugpy",
@@ -12,8 +13,6 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
-                //"REFLEX_USE_TURBOPACK": "1",
-                //"VITE_FORCE_FULL_RELOAD": "1",
                 "VITE_EXPERIMENTAL_HMR": "1"
             },
             "autoReload": {
@@ -33,5 +32,25 @@
                 "port": 5678
             }
         }
+{%- else %}
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Module ({{ package_name }})",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "{{ package_name }}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
+        }
+{%- endif %}
     ]
 }
