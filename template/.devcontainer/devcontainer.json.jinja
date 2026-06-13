@@ -23,6 +23,7 @@
 			"extensions": [
 				"-dbaeumer.vscode-eslint",
 				"-ms-python.autopep8", // disabled because we are using ruff
+				"astral-sh.ty",
 				"charliermarsh.ruff",
 				"esbenp.prettier-vscode",
 				"fill-labs.dependi",
@@ -41,12 +42,11 @@
 {%- endif %}
 {%- endif %}
 {%- if include_docker %}
-				"ms-azuretools.vscode-docker",
+				"ms-azuretools.vscode-containers",
 {%- endif %}
 {%- if project_type == 'reflex' or include_db %}
 				"ms-ossdata.vscode-pgsql",
 {%- endif %}
-				"astral-sh.ty",
 				"ms-python.python",
 				"mutantdino.resourcemonitor",
 				"naumovs.color-highlight",
@@ -57,7 +57,6 @@
 				"Upstash.context7-mcp",
 				"vscode-icons-team.vscode-icons",
 				"yzhang.markdown-all-in-one"
-				//				"ms-azuretools.vscode-containers",
 			]
 		}
 	},
@@ -82,11 +81,9 @@
 			"installTFsec": "true"
 		}{% if project_type == "reflex" %},{% endif %}
 {%- endif %}
-{%- if project_type == "reflex" %}
 		"ghcr.io/devcontainers/features/node:2.0.0": {
 			"version": "24"
 		}
-{%- endif %}
 	},
 	"postCreateCommand": {
 		"initialize environment": "bash ./.devcontainer/post-create.sh"
