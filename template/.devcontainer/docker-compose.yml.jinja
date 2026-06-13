@@ -12,7 +12,7 @@ services:
     command: sleep infinity
     networks:
       - {{ project_name }}-network
-
+{% if project_type == 'reflex' or include_db %}
   db:
     container_name: {{ project_name }}-db
     image: pgvector/pgvector:pg15
@@ -27,10 +27,12 @@ services:
       - 5433:5432
     networks:
       - {{ project_name }}-network
-
+{% endif %}
+{% if project_type == 'reflex' or include_db %}
 volumes:
   postgres-data:
     name: {{ project_name }}-postgres-data
+{% endif %}
 networks:
   {{ project_name }}-network:
     driver: bridge

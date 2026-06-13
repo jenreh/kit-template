@@ -23,9 +23,9 @@ cd my-project && task init
 | `project_description` | auto | |
 | `author_name` / `github_owner` | jenreh | |
 | `python_version` | 3.14 | sets `requires-python` + ruff target |
-| `include_db` | false | python: adds SQL deps. reflex: full DB layer (alembic) is always on |
+| `include_db` | false | adds SQL deps **+ Alembic** (pure `env.py`). reflex always includes the DB layer (appkit `env.py`) |
 | `db_name` | `{{ project_name }}-db` | asked for reflex / python+db |
-| `use_devcontainer` | true | reflex only |
+| `use_devcontainer` | true | any project type (db service included only when there's a DB) |
 | `include_docker` | reflex→true | Dockerfile+compose (reflex) / docker task |
 | `include_terraform` | false | `terraform/` + azure task |
 | `include_docs` | python→true | VitePress `docs/` scaffold |
@@ -52,9 +52,12 @@ cd my-project && task init
 
 - `Taskfile*.yml` are **not** Jinja-rendered (go-task `{{.VAR}}` would collide); `PROJECT` is
   derived from `pyproject.toml` at runtime.
-- **`include_graph`**: the runic skills are vendored, but the PyPI package named `runic` is
-  **unrelated** to the graph migration tool — add your graph `runic` from its own source/index
-  and pin it in `pyproject.toml`.
+- **`include_graph`**: adds `runic-py` (graph schema migrations + OGM for Cypher DBs) to
+  dependencies and vendors the runic skills. (Note: `include_graph` relaxes the `typer` pin to
+  `>=0.26.0`, which `runic-py` requires.)
+- **Alembic** works for both archetypes: `alembic/env.py` is rendered as the appkit-coupled
+  variant for reflex, or a pure SQLAlchemy variant (reads `$DATABASE_URL` / `alembic.ini`) for
+  Python — so `task db:*` is usable in both.
 - `task test` for **reflex** needs Postgres + `.env` secrets (the app boots against a DB).
 
 ## Maintainers

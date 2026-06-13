@@ -59,9 +59,8 @@ db_name:
 
 use_devcontainer:
   type: bool
-  help: Include the .devcontainer/ setup
+  help: Include the .devcontainer/ setup (works for any project type)
   default: true
-  when: "{{ project_type == 'reflex' }}"
 
 include_docker:
   type: bool
@@ -80,7 +79,7 @@ include_docs:
 
 include_graph:
   type: bool
-  help: Add GraphDB / runic (graph schema migrations + OGM) scaffolding hooks
+  help: Add GraphDB / runic-py (graph schema migrations + OGM for Cypher DBs)
   default: false
 
 include_skills:
@@ -114,34 +113,38 @@ _exclude:
   - ".pytest_cache"
   - ".mypy_cache"
   - ".ruff_cache"
+  # All conditional patterns are ROOT-ANCHORED (leading /) so they never catch a
+  # nested path of the same name (e.g. .agents/skills/*/assets, .devcontainer/Dockerfile).
   # reflex-only layer
-  - "{% if project_type != 'reflex' %}app{% endif %}"
-  - "{% if project_type != 'reflex' %}rxconfig.py{% endif %}"
-  - "{% if project_type != 'reflex' %}configuration{% endif %}"
-  - "{% if project_type != 'reflex' %}assets{% endif %}"
-  - "{% if project_type != 'reflex' %}components{% endif %}"
-  - "{% if project_type != 'reflex' %}.env.default{% endif %}"
-  - "{% if project_type != 'reflex' %}tasks/Taskfile.reflex.yml{% endif %}"
-  - "{% if project_type != 'reflex' %}.github/workflows{% endif %}"
+  - "{% if project_type != 'reflex' %}/app{% endif %}"
+  - "{% if project_type != 'reflex' %}/rxconfig.py{% endif %}"
+  - "{% if project_type != 'reflex' %}/configuration{% endif %}"
+  - "{% if project_type != 'reflex' %}/assets{% endif %}"
+  - "{% if project_type != 'reflex' %}/components{% endif %}"
+  - "{% if project_type != 'reflex' %}/.env.default{% endif %}"
+  - "{% if project_type != 'reflex' %}/tasks/Taskfile.reflex.yml{% endif %}"
+  - "{% if project_type != 'reflex' %}/.github/workflows{% endif %}"
   # python-only smoke test imports the python package
-  - "{% if project_type != 'python' %}tests/test_smoke.py{% endif %}"
-  # database / alembic scaffold is reflex-only (its env.py is appkit/reflex-coupled).
-  # For python, include_db adds only the SQL dependencies (see pyproject).
-  - "{% if project_type != 'reflex' %}alembic{% endif %}"
-  - "{% if project_type != 'reflex' %}alembic.ini{% endif %}"
-  - "{% if project_type != 'reflex' %}tasks/Taskfile.db.yml{% endif %}"
-  # docker
-  - "{% if not include_docker %}tasks/Taskfile.docker.yml{% endif %}"
-  - "{% if not (project_type == 'reflex' and include_docker) %}Dockerfile{% endif %}"
-  - "{% if not (project_type == 'reflex' and include_docker) %}docker-compose.yml{% endif %}"
-  - "{% if not (project_type == 'reflex' and include_docker) %}.dockerignore{% endif %}"
-  # devcontainer
-  - "{% if not (project_type == 'reflex' and use_devcontainer) %}.devcontainer{% endif %}"
+  - "{% if project_type != 'python' %}/tests/test_smoke.py{% endif %}"
+  # database / alembic: shipped for reflex or python+include_db. env.py.jinja renders a
+  # reflex (appkit) or a pure variant, so Taskfile.db.yml works for both. The seeded
+  # appkit migration is reflex-only.
+  - "{% if not (project_type == 'reflex' or include_db) %}/alembic{% endif %}"
+  - "{% if not (project_type == 'reflex' or include_db) %}/alembic.ini{% endif %}"
+  - "{% if not (project_type == 'reflex' or include_db) %}/tasks/Taskfile.db.yml{% endif %}"
+  - "{% if project_type != 'reflex' %}/alembic/versions/2025_12_30_appkit_user_0.10.0.py{% endif %}"
+  # docker (root files only; .devcontainer/ Dockerfile + compose are separate)
+  - "{% if not include_docker %}/tasks/Taskfile.docker.yml{% endif %}"
+  - "{% if not (project_type == 'reflex' and include_docker) %}/Dockerfile{% endif %}"
+  - "{% if not (project_type == 'reflex' and include_docker) %}/docker-compose.yml{% endif %}"
+  - "{% if not (project_type == 'reflex' and include_docker) %}/.dockerignore{% endif %}"
+  # devcontainer (available for any project type)
+  - "{% if not use_devcontainer %}/.devcontainer{% endif %}"
   # terraform
-  - "{% if not include_terraform %}terraform{% endif %}"
-  - "{% if not include_terraform %}tasks/Taskfile.terraform-azure.yaml{% endif %}"
+  - "{% if not include_terraform %}/terraform{% endif %}"
+  - "{% if not include_terraform %}/tasks/Taskfile.terraform-azure.yaml{% endif %}"
   # docs site
-  - "{% if not include_docs %}docs{% endif %}"
+  - "{% if not include_docs %}/docs{% endif %}"
 
 # ─── Post-generation ──────────────────────────────────────────────────────────
 
@@ -163,8 +166,8 @@ _message_after_copy: |
   (Claude Code, Codex, Copilot all resolve them). Refresh with: copier update --trust
   {% endif %}
   {% if include_graph %}
-  GraphDB/runic: the runic skills are vendored; add your graph `runic` package to
-  pyproject (the PyPI `runic` is unrelated — use your own source/index).
+  GraphDB: runic-py (graph migrations + OGM) is in your dependencies, and the
+  runic / runic-migrate / runic-ogm skills are vendored.
   {% endif %}
 
 _tasks:

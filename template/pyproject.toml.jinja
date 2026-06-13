@@ -25,7 +25,11 @@ dependencies = [
     "alembic>=1.18.4",
 {%- else %}
     "fastmcp==3.3.1",
+{%- if include_graph %}
+    "typer>=0.26.0",
+{%- else %}
     "typer==0.25.1",
+{%- endif %}
     "rich==15.0.0",
     "pydantic==2.13.4",
     "pydantic-settings==2.14.1",
@@ -38,9 +42,7 @@ dependencies = [
 {%- endif %}
 {%- endif %}
 {%- if include_graph %}
-    # GraphDB / runic (graph schema migrations + OGM). NOTE: the `runic` package on
-    # PyPI is unrelated; install your graph `runic` from its own source/index and pin it,
-    # e.g.:  # "runic-ogm>=1.0.0",
+    "runic-py>=0.3.6",
 {%- endif %}
 ]
 
