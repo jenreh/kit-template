@@ -87,6 +87,20 @@ include_skills:
   help: Vendor the canonical agent-skills (jenreh/agent-skills) into .agents/skills
   default: true
 
+create_github_repo:
+  type: bool
+  help: Create the project as a GitHub repo and push the initial commit (needs an authenticated `gh`)
+  default: false
+
+github_visibility:
+  type: str
+  help: Visibility for the new GitHub repo
+  choices:
+    Private: private
+    Public: public
+  default: private
+  when: "{{ create_github_repo }}"
+
 # ─── File selection ───────────────────────────────────────────────────────────
 # _exclude replaces Copier's defaults, so VCS/OS/build junk is re-listed first,
 # then each conditional pattern renders to "" (matches nothing) when its feature
@@ -150,7 +164,14 @@ _exclude:
 
 _message_after_copy: |
   Project "{{ project_name }}" ({{ project_type }}) created.
-
+  {% if create_github_repo %}
+  GitHub: {{ github_visibility }} repo pushed to
+  https://github.com/{{ github_owner }}/{{ project_name }} (if gh was authenticated).
+  {% else %}
+  Publish later with:
+    git add -A && git commit -m "init"
+    gh repo create {{ github_owner }}/{{ project_name }} --private --source=. --push
+  {% endif %}
   Next:
     cd {{ _copier_conf.dst_path }}
     task init
@@ -176,3 +197,12 @@ _tasks:
   - "uv sync"
   - command: "mkdir -p .claude && ln -sfn ../.agents/skills .claude/skills"
     when: "{{ include_skills }}"
+  # Optional: stage an initial commit and create the GitHub repo (requires `gh` auth).
+  - command: "git add -A && git commit -q -m 'Initial commit from kit-template'"
+    when: "{{ create_github_repo }}"
+  - command: >-
+      gh repo create {{ github_owner }}/{{ project_name }} --{{ github_visibility }}
+      --source=. --remote=origin --push
+      || echo 'GitHub repo not created (is gh authenticated? does the repo already exist?).
+      Create it later with: gh repo create {{ github_owner }}/{{ project_name }} --{{ github_visibility }} --source=. --push'
+    when: "{{ create_github_repo }}"
